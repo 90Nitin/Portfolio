@@ -1,0 +1,125 @@
+#Function to input data in R 
+#Specify file name and the path where the file is located
+#20140502 - This function shall work for csv files only
+#loading xlsReadWrite to be able to write xls files
+
+require(ggplot2)
+library(xlsReadWrite)
+options(stringsAsFactors = FALSE)
+library(forecast)
+require(forecast)
+library(caschrono)
+
+InputData <- function(path,file_name)
+	{
+		setwd(path)
+		train.data <- read.csv(file_name,header = TRUE)
+		return(train.data)
+	}
+
+#Invoking the created method in R
+
+train.data<-InputData("C:/Users/nsrivastava.AXTRIASEZ/Documents/Timeseries/InputData","xyz1.csv")
+
+str(train.data)
+
+yts<-ts(train.data$y,start = c(2001,1), frequency = 12)
+
+yts
+
+plot(stl(yts,s.window="period"))
+
+plot(diff(yts))
+
+plot(diff(diff(yts)))
+
+#plotting the acf for the timeseries to the q - MA term
+acf(yts)
+pacf(yts)
+
+#using minic function to select the p,d,q term for the first diff series
+
+armaselect(diff(yts),max.p = 10,max.q = 10,nbmod = 121)
+
+acf(diff(yts))
+pacf(diff(yts))
+
+plot(stl(diff(yts),s.window = "period"))
+
+fit<-arima(yts,order=c(1,1,1))
+
+coeftest(fit)
+
+difts<-diff(yts)
+
+fit<-arima(yts[1:82],order=c(1,1,1),xreg = train.data[1:82,c(1:19)])
+
+coeftest(fit)
+
+fit<-arima(yts[1:82],order=c(1,1,1),xreg = train.data[1:82,c(2,3,4,5)])
+
+coeftest(fit)
+
+predict(fit,n.ahead=12,newxreg=train.data[83:94,c(2,3,4,5)])
+
+#conducting leave 1 out validation
+
+#82
+fit<-arima(yts[1:70],order=c(1,1,1),xreg = train.data[1:70,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[71:82,c(2,3,4,5)])
+
+#81
+fit<-arima(yts[1:69],order=c(1,1,1),xreg = train.data[1:69,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[70:81,c(2,3,4,5)])
+
+#80
+fit<-arima(yts[1:68],order=c(1,1,1),xreg = train.data[1:68,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[69:80,c(2,3,4,5)])
+
+#79
+fit<-arima(yts[1:67],order=c(1,1,1),xreg = train.data[1:67,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[68:79,c(2,3,4,5)])
+
+#78
+fit<-arima(yts[1:66],order=c(1,1,1),xreg = train.data[1:66,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[67:78,c(2,3,4,5)])
+
+#77
+fit<-arima(yts[1:65],order=c(1,1,1),xreg = train.data[1:65,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[66:77,c(2,3,4,5)])
+
+#76
+fit<-arima(yts[1:64],order=c(1,1,1),xreg = train.data[1:64,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[65:76,c(2,3,4,5)])
+
+#75
+fit<-arima(yts[1:63],order=c(1,1,1),xreg = train.data[1:63,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[64:75,c(2,3,4,5)])
+
+#74
+fit<-arima(yts[1:62],order=c(1,1,1),xreg = train.data[1:62,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[63:74,c(2,3,4,5)])
+
+#73
+fit<-arima(yts[1:61],order=c(1,1,1),xreg = train.data[1:61,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[62:73,c(2,3,4,5)])
+
+#72
+fit<-arima(yts[1:60],order=c(1,1,1),xreg = train.data[1:60,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[61:72,c(2,3,4,5)])
+
+#71
+fit<-arima(yts[1:59],order=c(1,1,1),xreg = train.data[1:59,c(2,3,4,5)])
+
+predict(fit,n.ahead=12,newxreg=train.data[59:71,c(2,3,4,5)])

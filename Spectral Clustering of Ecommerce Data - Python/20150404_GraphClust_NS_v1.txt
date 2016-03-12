@@ -1,0 +1,20 @@
+__author__ = 'nsrivas3'
+import numpy
+import pandas
+
+#Define a function <here> to input the address from the given list and to adjacency matrix
+click_data = numpy.genfromtxt('C:/Users/Nitin/Dropbox/UIUC - Industrial Engineering/Thesis Research/RecSys/RecSys Data/Formatted data/samplegraph.csv',delimiter = ',',names = True)
+nrow = click_data.shape[1] #Calculating the #rows = #cols in the ad. matrix
+
+#Computing the Diagonal of the Ad. Matrix
+D = numpy.zeros((nrow,nrow))
+for i in range(0,nrow):
+   D[i][i] = sum(click_data[i])
+ 
+#Define the LapLacian of the graph Ad matrix
+L = D - click_data
+eigval,eigv = numpy.linalg.eigh(L)
+eigv = eigv[1]
+eigvec = numpy.linalg.solve(D,eigv)
+
+

@@ -1,0 +1,74 @@
+require(ggplot2)
+library(xlsReadWrite)
+options(stringsAsFactors = FALSE)
+library(forecast)
+require(forecast)
+library(caschrono)
+library(lubridate)
+library(lmtest)
+library(zoo)
+
+InputData <- function(path,file_name)
+	{
+		setwd(path)
+		train.data <- read.csv(file_name,header = TRUE)
+		return(train.data)
+	}
+
+#Invoking the created method in R
+
+train.data<-InputData("C:/Users/nsrivastava.AXTRIASEZ/Documents/Timeseries/Time Series XYZ data/01.Input Data","xyz1.csv")
+
+str(train.data)
+
+train.ts<-ts(train.data,start=c(2001,1), freq = 12)
+
+yts<-ts(train.data$y,start = c(2001,1), frequency = 12)
+
+#Code to conduct Leave1OutValidation on the data.frame
+#Code to conduct Leave1OutValidation for after 12 months
+#Pass the data.frame with the input data
+#Pass a depvar ts object to the function
+#Pass the starting point of the time series object
+#Pass the order of the time series for which Leave1OutValidation is to be conducted
+#Pass the list of variables against which dependent variable is to be regressed
+
+	
+Leave1OutVal <- function(ds,depvar,obpoint,start,order.ts,varlist)
+{
+	obpoint1<-obpoint 
+	pred<-data.frame(pred = numeric(0),actual=numeric(0),datestamp=character(0))
+	temp<-NULL
+	for(i in 1:12)
+	{	
+		perf.end<-obpoint1
+		perf.beg<-obpoint1
+		if (month(obpoint1) == 12)
+		{
+			year(perf.beg)<- year(obpoint1)+1
+			month(perf.beg)<- 1
+		}
+		else month(perf.beg) <- month(obpoint1) + 1
+		year(perf.end)<-year(obpoint1)+1
+		month(perf.end)<-month(obpoint1)
+		day(perf.end)<-day(obpoint1)
+		depvar1<-window(depvar,c(year(start),month(start)),c(year(obpoint1),month(obpoint1)))
+		print(paste("obpoint1 ",obpoint1," perf.beg",perf.beg," perf.end",perf.end," ",varlist[1]," ",varlist[2]," ",varlist[3]," ",varlist[4]))
+		fit<-arima(depvar1,order=order.ts,xreg = window(ds[,varlist],c(year(start),month(start)),c(year(obpoint1),month(obpoint1))))
+		temp<-predict(fit,n.ahead=12,newxreg=window(ds[,varlist],c(year(perf.beg),month(perf.beg)),c(year(perf.end),month(perf.end))))
+		pred[i,1]<-tail(temp$pred,1)
+		pred[i,2]<-window(ds[,20],c(year(perf.end),month(perf.end)),c(year(perf.end),month(perf.end)))
+		#pred[i,3]<-as.Date(gsub("\\s","",paste(month(perf.end),"/",day(perf.end),"/",year(perf.end))),origin = '1970/1/1',"%m/%d/%Y")
+		pred[i,3]<-gsub("\\s","",paste(month(perf.end),"/",day(perf.end),"/",year(perf.end)))
+		month(obpoint1)<-month(obpoint1)-1
+	}
+	plot(pred$actual,type="o",col="red",ylim=c(min(min(pred$pred),min(pred$actual)),max(max(pred$pred),max(pred$actual))))
+	lines(pred$pred,col="green",type="o")
+	return(pred)
+}
+pred1<-Leave1OutVal(train.ts,yts,as.Date('2006/10/1'),as.Date('2001/1/1'),c(1,1,1),c(2,3,4,5))
+
+
+
+
+

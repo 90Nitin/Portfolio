@@ -1,0 +1,117 @@
+#Function to input data in R 
+#Specify file name and the path where the file is located
+#20140502 - This function shall work for csv files only
+#loading xlsReadWrite to be able to write xls files
+
+require(ggplot2)
+library(xlsReadWrite)
+options(stringsAsFactors = FALSE)
+library(forecast)
+require(forecast)
+library(caschrono)
+
+InputData <- function(path,file_name)
+	{
+		setwd(path)
+		train.data <- read.csv(file_name,header = TRUE)
+		return(train.data)
+	}
+
+#Invoking the created method in R
+
+train.data<-InputData("C:/Users/nsrivastava.AXTRIASEZ/Documents/Timeseries/InputData","xyz_1.csv")
+	
+#checking the data types in the base data set
+
+str(train.data)
+
+#converting date strings to date format
+
+train.data$date2 <- as.Date(train.data$Date,"%m/%d/%y")
+
+str(train.data)
+
+#plot timeseries between y and date stamp
+
+ggplot(data = train.data, aes( date2, y)) + geom_line()
+
+#implementing first difference on y and calling it d1
+
+train.data$d1 <- 0
+
+for(i in 2:nrow(train.data))
+{
+	train.data[i-1,"d1"] <- train.data[i,"y"] - train.data[i-1,"y"]
+
+}
+
+#checking the dataset after first differencing
+
+str(train.data)
+
+ggplot(data = train.data, aes( date2, d1)) + geom_line()
+
+#implementing second difference on y and calling it d2
+
+train.data$d2 <- 0
+
+for(i in 2:nrow(train.data))
+{
+	train.data[i-1,"d2"] <- train.data[i,"d1"] - train.data[i-1,"d1"]
+
+}
+
+#checking the dataset after second differencing
+
+str(train.data)
+
+ggplot(data = train.data, aes( date2, d2)) + geom_line()
+
+#creating timeseries objects out of the differenced and original variables
+
+train.data$y1<-ts(train.data$y,start=2009,freq=12)
+train.data$d1_1<-ts(train.data$d1,start=2009,freq=12)
+train.data$d2_1<-ts(train.data$d2,start=2009,freq=12)
+
+#ACF and PACF for the timeseries data
+
+acf(train.data$y1)
+pacf(train.data$y1)
+#Best Model figures - p = 1 or 2 q = 0
+
+#minic function to calculate the value of p q and d - confirming the values obtained from graphs	
+
+armaselect(train.data$y, max.p = 10,max.q = 10, nbmod = 121)	
+
+#Best model criterion is the lowest value of SBC
+#Best model figures - p = 1 q = 0
+
+#auto arima in R
+
+
+auto.arima(train.data$y, d=NA,  max.p=15, max.q=15,
+      max.d=2,
+     start.p=2, start.q=2, 
+     stationary=FALSE, seasonal=TRUE,
+     ic=c("aicc","aic", "bic"), stepwise=TRUE, trace=FALSE,
+     approximation=(length(train.data$y)>100 | frequency(train.data$y)>12), xreg=NULL,
+     test=c("kpss","adf","pp"), seasonal.test=c("ocsb","ch"),
+     allowdrift=TRUE, lambda=NULL, parallel=FALSE, num.cores=NULL)
+
+#Bacfest model figures - p = 0 q = 1
+
+#arima on the model parameters from the graph
+
+
+
+
+
+
+
+
+
+
+
+
+
+
