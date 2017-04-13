@@ -1,5 +1,3 @@
-# README #
-
 This Repository Contains Codes that I have developed over different projects. I have included Codes that I wrote on R, SAS and Python. I have compiled a list of different projects that these codes were a part of. Please find the same list below.
 
 1. Spectral Clustering Code - 
